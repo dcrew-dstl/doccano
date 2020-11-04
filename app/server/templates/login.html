@@ -83,6 +83,12 @@
           <span>Login with Okta</span>
         </a>
         {% endif %}
+        {% if cognito_login %}
+        <a href="{% url 'social:begin' 'cognito' %}" class="button is-fullwidth mb10">
+          <span class="icon"><i class="fab fa-aws"></i></span>
+          <span>Login with AWS Cognito</span>
+        </a>
+        {% endif %}
       </div>
     </div>
   </div>
