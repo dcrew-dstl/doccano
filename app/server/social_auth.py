@@ -151,14 +151,15 @@ def fetch_cognito_permissions(strategy, details, user=None, is_new=False, *args,
     if not user or not isinstance(kwargs['backend'], CognitoOAuth2):
         return
 
-    response = backend.get_json(
+    response = requests.post(
         url=backend.user_data_url(),
         headers={'Authorization': 'Bearer {}'.format(kwargs['response']['access_token'])},
     )
+    response.raise_for_status()
+    response = response.json()
 
     is_superuser = admin_group_name in response.get("groups", [])
 
     if user.is_superuser != is_superuser:
         user.is_superuser = is_superuser
         user.save()
-    pass
