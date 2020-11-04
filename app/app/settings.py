@@ -146,6 +146,7 @@ AUTHENTICATION_BACKENDS = [
     'social_core.backends.azuread_tenant.AzureADTenantOAuth2',
     'social_core.backends.okta.OktaOAuth2',
     'social_core.backends.okta_openidconnect.OktaOpenIdConnect',
+    'social_core.backends.cognito.CognitoOAuth2',
     'django.contrib.auth.backends.ModelBackend',
 ]
 
@@ -191,6 +192,12 @@ OKTA_OPENIDCONNECT_ADMIN_GROUP_NAME = env('OKTA_OPENIDCONNECT_ADMIN_GROUP_NAME',
 if SOCIAL_AUTH_OKTA_OPENIDCONNECT_API_URL:
     SOCIAL_AUTH_OKTA_OPENIDCONNECT_SCOPE = ["groups"]
 
+SOCIAL_AUTH_COGNITO_KEY = env('SOCIAL_AUTH_COGNITO_KEY', None)
+SOCIAL_AUTH_COGNITO_SECRET = env('SOCIAL_AUTH_COGNITO_SECRET', None)
+SOCIAL_AUTH_COGNITO_POOL_DOMAIN = env('SOCIAL_AUTH_COGNITO_POOL_DOMAIN', None)
+SOCIAL_AUTH_COGNITO_SCOPE = ['groups']
+COGNITO_ADMIN_GROUP_NAME = env('COGNITO_ADMIN_GROUP_NAME', None)
+
 SOCIAL_AUTH_PIPELINE = [
     'social_core.pipeline.social_auth.social_details',
     'social_core.pipeline.social_auth.social_uid',
@@ -205,6 +212,7 @@ SOCIAL_AUTH_PIPELINE = [
     'server.social_auth.fetch_azuread_permissions',
     'server.social_auth.fetch_okta_oauth2_permissions',
     'server.social_auth.fetch_okta_openidconnect_permissions',
+    'server.social_auth.fetch_cognito_permissions',
 ]
 
 ROLE_PROJECT_ADMIN = env('ROLE_PROJECT_ADMIN', 'project_admin')
