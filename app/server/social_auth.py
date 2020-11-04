@@ -4,6 +4,7 @@ from social_core.backends.azuread_tenant import AzureADTenantOAuth2
 from social_core.backends.github import GithubOAuth2
 from social_core.backends.okta import OktaOAuth2
 from social_core.backends.okta_openidconnect import OktaOpenIdConnect
+from social_core.backends.cognito import CognitoOAuth2
 
 
 # noinspection PyUnusedLocal
@@ -141,3 +142,23 @@ def fetch_okta_openidconnect_permissions(strategy, details, user=None, is_new=Fa
 
     if user_changed:
         user.save()
+
+
+# noinspection PyUnusedLocal
+def fetch_cognito_permissions(strategy, details, user=None, is_new=False, *args, **kwargs):
+    admin_group_name = getattr(settings, "COGNITO_ADMIN_GROUP_NAME", "")
+    backend = kwargs['backend']
+    if not user or not isinstance(kwargs['backend'], CognitoOAuth2):
+        return
+
+    response = backend.get_json(
+        url=backend.user_data_url(),
+        headers={'Authorization': 'Bearer {}'.format(kwargs['response']['access_token'])},
+    )
+
+    is_superuser = admin_group_name in response.get("groups", [])
+
+    if user.is_superuser != is_superuser:
+        user.is_superuser = is_superuser
+        user.save()
+    pass
