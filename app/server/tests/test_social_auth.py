@@ -4,6 +4,7 @@ from social_core.backends.azuread_tenant import AzureADTenantOAuth2
 from social_core.backends.github import GithubOAuth2
 from social_core.backends.okta import OktaOAuth2
 from social_core.backends.okta_openidconnect import OktaOpenIdConnect
+from social_core.backends.cognito import CognitoOAuth2
 from vcr_unittest import VCRMixin
 
 from .. import social_auth
@@ -159,6 +160,42 @@ class TestOktaOpenIdConnectSocialAuth(VCRTestCase):
         user = User()
 
         social_auth.fetch_okta_openidconnect_permissions(
+            strategy=self.strategy,
+            details={},
+            user=user,
+            backend=self.backend,
+            response={'access_token': self.access_token},
+        )
+
+        self.assertFalse(user.is_superuser)
+
+
+@override_settings(SOCIAL_AUTH_COGNITO_KEY='0000000000aaaaaaaaaa')  # nosec
+@override_settings(SOCIAL_AUTH_COGNITO_SECRET='bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb=')  # nosec
+@override_settings(SOCIAL_AUTH_COGNITO_POOL_DOMAIN='https://cognito.domain.com')  # nosec
+@override_settings(COGNITO_ADMIN_GROUP_NAME='admin-group')
+class TestCognitoSocialAuth(VCRTestCase):
+    strategy = None
+    backend = CognitoOAuth2(strategy=strategy)
+    access_token = 'censored'
+
+    def test_fetch_permissions_is_admin(self):
+        user = User()
+
+        social_auth.fetch_cognito_permissions(
+            strategy=self.strategy,
+            details={},
+            user=user,
+            backend=self.backend,
+            response={'access_token': self.access_token},
+        )
+
+        self.assertTrue(user.is_superuser)
+
+    def test_fetch_permissions_not_admin(self):
+        user = User()
+
+        social_auth.fetch_cognito_permissions(
             strategy=self.strategy,
             details={},
             user=user,
